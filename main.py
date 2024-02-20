@@ -1,16 +1,17 @@
 import numpy as np
 import sounddevice as sd
+import pygame
 
 # https://muted.io/note-frequencies/
 NOTE_FREQUENCIES = {
-    'A4': 440.00,
-    'B4': 493.88,
-    'C5': 523.25,
-    'D5': 587.33,
-    'E5': 659.25,
-    'F5': 698.46,
-    'G5': 783.99,
-    'A5': 880.00
+    pygame.K_a: 440.00, # A4
+    pygame.K_s: 493.88, # B4
+    pygame.K_d: 523.25, # C4
+    pygame.K_f: 587.33, # D4
+    pygame.K_g: 659.25, # E4
+    pygame.K_h: 698.46, # F4
+    pygame.K_j: 783.99, # G4
+    pygame.K_k: 880.00  # A5
 }
 
 SAMPLE_RATE = 44100
@@ -22,7 +23,19 @@ def generate_sine_wave(frequency):
     out_sample=np.floor(sine_wave*32767).astype(np.int16)
     return out_sample
 
-for freq in NOTE_FREQUENCIES.values():
-    samples = generate_sine_wave(freq)
-    sd.play(samples, SAMPLE_RATE)
-    sd.wait()
+pygame.init()
+pygame.display.set_mode((100, 100))
+
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
+            key = event.key
+            if key in NOTE_FREQUENCIES:
+                freq = NOTE_FREQUENCIES[key]
+                samples = generate_sine_wave(freq)
+                sd.play(samples, SAMPLE_RATE)
+        elif event.type == pygame.QUIT:
+            running = False
+
+pygame.quit()
