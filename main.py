@@ -17,11 +17,26 @@ NOTE_FREQUENCIES = {
 SAMPLE_RATE = 44100
 DURATION = 1
 
-def generate_sine_wave(frequency):
+def generate_piano_note(frequency):
     time = np.linspace(0, DURATION, SAMPLE_RATE, endpoint=False)
     sine_wave = np.sin(2*np.pi*frequency*time)
-    out_sample=np.floor(sine_wave*32767).astype(np.int16)
-    return out_sample
+
+    attack_time = 0.01
+    decay_time = 0.01
+    release_time = 0.6
+    sustain_level = 0.2
+
+    # https://en.wikipedia.org/wiki/Envelope_(music)
+    envelope = np.concatenate([
+        np.linspace(0, 1, int(attack_time * SAMPLE_RATE), endpoint=False),
+        np.linspace(1, sustain_level, int(decay_time * SAMPLE_RATE), endpoint=False),
+        np.full(int((DURATION - attack_time - decay_time - release_time) * SAMPLE_RATE), sustain_level),
+        np.linspace(sustain_level, 0, int(release_time * SAMPLE_RATE), endpoint=False)
+    ])
+
+    piano_note = sine_wave * envelope
+
+    return piano_note
 
 pygame.init()
 pygame.display.set_mode((100, 100))
@@ -33,7 +48,7 @@ while running:
             key = event.key
             if key in NOTE_FREQUENCIES:
                 freq = NOTE_FREQUENCIES[key]
-                samples = generate_sine_wave(freq)
+                samples = generate_piano_note(freq)
                 sd.play(samples, SAMPLE_RATE)
         elif event.type == pygame.QUIT:
             running = False
