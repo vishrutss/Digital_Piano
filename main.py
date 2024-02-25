@@ -38,19 +38,32 @@ def generate_piano_note(frequency):
 
     return piano_note
 
-pygame.init()
-pygame.display.set_mode((100, 100))
+def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
+    num_samples = len(note_samples)
+    reverb_buffer = np.zeros(SAMPLE_RATE)
+    reverb = np.zeros(num_samples)
 
-running = True
-while running:
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
-            key = event.key
-            if key in NOTE_FREQUENCIES:
-                freq = NOTE_FREQUENCIES[key]
-                samples = generate_piano_note(freq)
-                sd.play(samples, SAMPLE_RATE)
-        elif event.type == pygame.QUIT:
-            running = False
+    for i in range(num_samples):
+        reverb_buffer[:-1] = reverb_buffer[1:]
+        reverb_buffer[-1] = note_samples[i] + feedback * reverb_buffer[-1]
+        reverb[i] = note_samples[i] + reverb_gain * reverb_buffer[-1]
 
-pygame.quit()
+    return reverb
+
+if __name__ == '__main__':
+    pygame.init()
+    pygame.display.set_mode((100, 100))
+
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
+                key = event.key
+                if key in NOTE_FREQUENCIES:
+                    freq = NOTE_FREQUENCIES[key]
+                    samples = generate_reverb(generate_piano_note(freq))
+                    sd.play(samples, SAMPLE_RATE)
+            elif event.type == pygame.QUIT:
+                running = False
+
+    pygame.quit()
