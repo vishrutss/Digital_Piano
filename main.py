@@ -17,9 +17,27 @@ NOTE_FREQUENCIES = {
 SAMPLE_RATE = 44100
 DURATION = 1
 
+# https://www.math.drexel.edu/~dp399/musicmath/Karplus-Strong.html
+def karplus_strong(note_frequency):
+    length = int(SAMPLE_RATE / note_frequency)
+    signal = np.random.uniform(-1, 1, length)
+    new_samples = []
+    current_sample = 0
+    previous_value = 0
+
+    while len(new_samples) < int(DURATION * SAMPLE_RATE):
+        signal[current_sample] = 0.5 * (signal[current_sample] + previous_value)
+        new_samples.append(signal[current_sample])
+        previous_value = new_samples[-1]
+        current_sample += 1
+        current_sample = current_sample % signal.size
+    return np.array(new_samples)
+
 def generate_piano_note(frequency):
     time = np.linspace(0, DURATION, SAMPLE_RATE, endpoint=False)
-    sine_wave = np.sin(2*np.pi*frequency*time)
+    frequencies = [frequency, frequency * 1.5, frequency * 0.5]
+    sine_waves = [np.sin(2*np.pi*f*time) for f in frequencies]
+    combined_wave = np.sum(sine_waves, axis=0)
 
     attack_time = 0.01
     decay_time = 0.01
@@ -34,8 +52,7 @@ def generate_piano_note(frequency):
         np.linspace(sustain_level, 0, int(release_time * SAMPLE_RATE), endpoint=False)
     ])
 
-    piano_note = sine_wave * envelope
-
+    piano_note = combined_wave * envelope
     return piano_note
 
 def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
@@ -61,7 +78,7 @@ if __name__ == '__main__':
                 key = event.key
                 if key in NOTE_FREQUENCIES:
                     freq = NOTE_FREQUENCIES[key]
-                    samples = generate_reverb(generate_piano_note(freq))
+                    samples = generate_piano_note(freq)
                     sd.play(samples, SAMPLE_RATE)
             elif event.type == pygame.QUIT:
                 running = False
