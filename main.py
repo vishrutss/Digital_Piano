@@ -71,16 +71,27 @@ if __name__ == '__main__':
     pygame.init()
     pygame.display.set_mode((100, 100))
 
+    playing_notes = set()
     running = True
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
                 key = event.key
                 if key in NOTE_FREQUENCIES:
-                    freq = NOTE_FREQUENCIES[key]
-                    samples = generate_piano_note(freq)
-                    sd.play(samples, SAMPLE_RATE)
+                    playing_notes.add(NOTE_FREQUENCIES[key])
+            elif event.type == pygame.KEYUP:
+                key = event.key
+                if key in NOTE_FREQUENCIES:
+                    playing_notes.remove(NOTE_FREQUENCIES[key])
             elif event.type == pygame.QUIT:
                 running = False
+
+        combined_samples = np.zeros(int(DURATION * SAMPLE_RATE))
+        for freq in playing_notes:
+            combined_samples += generate_piano_note(freq)
+
+        sd.play(combined_samples, SAMPLE_RATE)
+        sd.wait()
 
     pygame.quit()
