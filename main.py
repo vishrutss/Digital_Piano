@@ -80,16 +80,14 @@ if __name__ == '__main__':
                 key = event.key
                 if key in NOTE_FREQUENCIES:
                     playing_notes.add(NOTE_FREQUENCIES[key])
-            elif event.type == pygame.KEYUP:
-                key = event.key
-                if key in NOTE_FREQUENCIES:
-                    playing_notes.remove(NOTE_FREQUENCIES[key])
             elif event.type == pygame.QUIT:
                 running = False
 
         combined_samples = np.zeros(int(DURATION * SAMPLE_RATE))
         for freq in playing_notes:
             combined_samples += generate_piano_note(freq)
+
+        playing_notes.clear()
 
         sd.play(combined_samples, SAMPLE_RATE)
         sd.wait()
