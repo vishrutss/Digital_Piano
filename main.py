@@ -1,6 +1,7 @@
 import numpy as np
 import sounddevice as sd
 import pygame
+import pygame_menu
 
 # https://muted.io/note-frequencies/
 NOTE_FREQUENCIES = {
@@ -67,10 +68,9 @@ def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
 
     return reverb
 
-if __name__ == '__main__':
+def play():
     pygame.init()
-    pygame.display.set_mode((100, 100))
-
+    pygame.display.set_mode((600, 400))
     playing_notes = set()
     running = True
     piano_notes = {}
@@ -96,5 +96,18 @@ if __name__ == '__main__':
         sd.wait()
 
         playing_notes.clear()
+
+if __name__ == '__main__':
+    pygame.init()
+    surface = pygame.display.set_mode((600, 400))
+
+    # https://pygame-menu.readthedocs.io/en/latest/
+    menu = pygame_menu.Menu('Welcome', 500, 400,
+                            theme=pygame_menu.themes.THEME_DARK)
+
+    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3)])
+    menu.add.button("Select", play)
+
+    menu.mainloop(surface)
 
     pygame.quit()
