@@ -33,9 +33,9 @@ def karplus_strong(note_frequency):
         current_sample = current_sample % signal.size
     return np.array(new_samples)
 
-def generate_piano_note(frequency):
+def generate_piano_note(freq):
     time = np.linspace(0, DURATION, SAMPLE_RATE, endpoint=False)
-    frequencies = [frequency, frequency * 1.5, frequency * 0.5]
+    frequencies = [freq, freq * 1.5, freq * 0.5]
     sine_waves = [np.sin(2*np.pi*f*time) for f in frequencies]
     combined_wave = np.sum(sine_waves, axis=0)
 
