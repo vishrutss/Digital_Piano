@@ -68,9 +68,18 @@ def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
 
     return reverb
 
-def play():
-    pygame.init()
-    pygame.display.set_mode((600, 400))
+def play(effect, _value):
+    play_window = pygame.display.set_mode((600, 400))
+
+    font = pygame.font.Font(None, 36)
+    text = font.render("Selected effect: "+effect[0][0], True, (255, 255, 255))
+    esc_text = font.render("Press ESC to go back", True, (255, 255, 255))
+    esc_text_rect = esc_text.get_rect(center=(play_window.get_width() // 2, (play_window.get_height() // 2)))
+    text_rect = text.get_rect(center = (play_window.get_width() // 2, 80))
+    play_window.blit(text, text_rect)
+    play_window.blit(esc_text, esc_text_rect)
+    pygame.display.flip()
+
     playing_notes = set()
     running = True
     piano_notes = {}
@@ -84,6 +93,8 @@ def play():
                 key = event.key
                 if key in NOTE_FREQUENCIES:
                     playing_notes.add(key)
+                elif key == pygame.K_ESCAPE:
+                    running = False
             elif event.type == pygame.QUIT:
                 running = False
 
@@ -99,15 +110,14 @@ def play():
 
 if __name__ == '__main__':
     pygame.init()
-    surface = pygame.display.set_mode((600, 400))
+    window = pygame.display.set_mode((600, 400))
 
     # https://pygame-menu.readthedocs.io/en/latest/
     menu = pygame_menu.Menu('Welcome', 500, 400,
                             theme=pygame_menu.themes.THEME_DARK)
 
-    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3)])
-    menu.add.button("Select", play)
+    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3)], onchange=play)
 
-    menu.mainloop(surface)
+    menu.mainloop(window)
 
     pygame.quit()
