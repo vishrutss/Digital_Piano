@@ -69,16 +69,23 @@ def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
     return reverb
 
 def play(effect, _value):
-    play_window = pygame.display.set_mode((600, 400))
+    play_window = pygame.display.set_mode((700, 500))
+    play_window.fill((165,42,42))
 
     font = pygame.font.Font(None, 36)
     text = font.render("Selected effect: "+effect[0][0], True, (255, 255, 255))
-    esc_text = font.render("Press ESC to go back", True, (255, 255, 255))
-    esc_text_rect = esc_text.get_rect(center=(play_window.get_width() // 2, (play_window.get_height() // 2)))
-    text_rect = text.get_rect(center = (play_window.get_width() // 2, 80))
+    text_rect = text.get_rect(center = (play_window.get_width() // 2, 200))
     play_window.blit(text, text_rect)
-    play_window.blit(esc_text, esc_text_rect)
-    pygame.display.flip()
+
+    # https://medium.com/@01one/how-to-create-clickable-button-in-pygame-8dd608d17f1b
+    btn_surface = pygame.Surface((150, 50))
+    btn_text = font.render("Go back", True, (255, 255, 255))
+    text_rect = btn_text.get_rect(center=(btn_surface.get_width() / 2, btn_surface.get_height() / 2))
+    btn_rect = pygame.Rect(270, 300, 150, 50)
+    btn_surface.blit(btn_text, text_rect)
+    play_window.blit(btn_surface, (btn_rect.x, btn_rect.y))
+
+    pygame.display.update()
 
     playing_notes = set()
     running = True
@@ -89,12 +96,13 @@ def play(effect, _value):
 
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if btn_rect.collidepoint(event.pos):
+                    return
+            elif event.type == pygame.KEYDOWN:  # https://www.pygame.org/docs/ref/key.html
                 key = event.key
                 if key in NOTE_FREQUENCIES:
                     playing_notes.add(key)
-                elif key == pygame.K_ESCAPE:
-                    running = False
             elif event.type == pygame.QUIT:
                 running = False
 
@@ -110,10 +118,10 @@ def play(effect, _value):
 
 if __name__ == '__main__':
     pygame.init()
-    window = pygame.display.set_mode((600, 400))
+    window = pygame.display.set_mode((700, 500))
 
     # https://pygame-menu.readthedocs.io/en/latest/
-    menu = pygame_menu.Menu('Welcome', 500, 400,
+    menu = pygame_menu.Menu('Welcome', 600, 500,
                             theme=pygame_menu.themes.THEME_DARK)
 
     menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3)], onchange=play)
