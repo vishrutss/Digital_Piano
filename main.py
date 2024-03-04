@@ -92,7 +92,12 @@ def play(effect, _value):
     piano_notes = {}
 
     for key, frequency in NOTE_FREQUENCIES.items():
-        piano_notes[key] = generate_piano_note(frequency)
+        if effect[0][0] == "Regular":
+            piano_notes[key] = generate_piano_note(frequency)
+        elif effect[0][0] == "Karplus Strong":
+            piano_notes[key] = karplus_strong(frequency)
+        elif effect[0][0] == "Reverb":
+            piano_notes[key] = generate_reverb(generate_piano_note(frequency))
 
     while running:
         for event in pygame.event.get():
