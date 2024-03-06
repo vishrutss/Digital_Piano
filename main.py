@@ -68,6 +68,15 @@ def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
 
     return reverb
 
+def generate_echo(note_samples, decay=0.5):
+    echo = note_samples
+    num_echoes = 2
+    for _ in range(num_echoes):
+        note_samples = decay * note_samples
+        echo = np.append(echo, note_samples)
+
+    return echo
+
 def play(effect, _value):
     play_window = pygame.display.set_mode((700, 500))
     play_window.fill((165,42,42))
@@ -98,6 +107,8 @@ def play(effect, _value):
             piano_notes[key] = karplus_strong(frequency)
         elif effect[0][0] == "Reverb":
             piano_notes[key] = generate_reverb(generate_piano_note(frequency))
+        elif effect[0][0] == "Echo":
+            piano_notes[key] = generate_echo(generate_piano_note(frequency))
 
     while running:
         for event in pygame.event.get():
@@ -111,7 +122,10 @@ def play(effect, _value):
             elif event.type == pygame.QUIT:
                 running = False
 
-        combined_samples = np.zeros(int(DURATION * SAMPLE_RATE))
+        if effect[0][0] == "Echo":
+            combined_samples = np.zeros(int(DURATION * SAMPLE_RATE * 3))
+        else:
+            combined_samples = np.zeros(int(DURATION * SAMPLE_RATE))
 
         for key in playing_notes:
             combined_samples += piano_notes[key]
@@ -129,7 +143,7 @@ if __name__ == '__main__':
     menu = pygame_menu.Menu('Welcome', 600, 500,
                             theme=pygame_menu.themes.THEME_DARK)
 
-    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3)], onchange=play)
+    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3), ('Echo', 4)], onchange=play)
 
     menu.mainloop(window)
 
