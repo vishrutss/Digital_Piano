@@ -77,7 +77,32 @@ def generate_echo(note_samples, decay=0.5):
 
     return echo
 
+def pitch_shift(audio_data, pitch_factor):
+    num_samples = len(audio_data)
+    pitch_shifted = np.zeros(num_samples)
+    for i in range(num_samples):
+        new_sample_index = int(i * pitch_factor)
+        if new_sample_index < num_samples:
+            pitch_shifted[i] = audio_data[new_sample_index]
+    return pitch_shifted
+
 def play(effect, _value):
+    playing_notes = set()
+    running = True
+    piano_notes = {}
+
+    for key, frequency in NOTE_FREQUENCIES.items():
+        if effect[0][0] == "Regular":
+            piano_notes[key] = generate_piano_note(frequency)
+        elif effect[0][0] == "Karplus Strong":
+            piano_notes[key] = karplus_strong(frequency)
+        elif effect[0][0] == "Reverb":
+            piano_notes[key] = generate_reverb(generate_piano_note(frequency))
+        elif effect[0][0] == "Echo":
+            piano_notes[key] = generate_echo(generate_piano_note(frequency))
+        elif effect[0][0] == "Pitch Shift":
+            piano_notes[key] = pitch_shift(generate_piano_note(frequency), 0.5)
+
     play_window = pygame.display.set_mode((700, 500))
     play_window.fill((165,42,42))
 
@@ -95,20 +120,6 @@ def play(effect, _value):
     play_window.blit(btn_surface, (btn_rect.x, btn_rect.y))
 
     pygame.display.update()
-
-    playing_notes = set()
-    running = True
-    piano_notes = {}
-
-    for key, frequency in NOTE_FREQUENCIES.items():
-        if effect[0][0] == "Regular":
-            piano_notes[key] = generate_piano_note(frequency)
-        elif effect[0][0] == "Karplus Strong":
-            piano_notes[key] = karplus_strong(frequency)
-        elif effect[0][0] == "Reverb":
-            piano_notes[key] = generate_reverb(generate_piano_note(frequency))
-        elif effect[0][0] == "Echo":
-            piano_notes[key] = generate_echo(generate_piano_note(frequency))
 
     while running:
         for event in pygame.event.get():
@@ -143,7 +154,8 @@ if __name__ == '__main__':
     menu = pygame_menu.Menu('Welcome', 600, 500,
                             theme=pygame_menu.themes.THEME_DARK)
 
-    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3), ('Echo', 4)], onchange=play)
+    menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3), ('Echo', 4),
+                                    ('Pitch Shift', 5)], onchange=play)
 
     menu.mainloop(window)
 
