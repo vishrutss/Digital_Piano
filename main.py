@@ -56,17 +56,45 @@ def generate_piano_note(freq):
     piano_note = combined_wave * envelope
     return piano_note
 
-def generate_reverb(note_samples, reverb_gain=0.7, feedback=0.8):
-    num_samples = len(note_samples)
-    reverb_buffer = np.zeros(SAMPLE_RATE)
-    reverb = np.zeros(num_samples)
 
-    for i in range(num_samples):
-        reverb_buffer[:-1] = reverb_buffer[1:]
-        reverb_buffer[-1] = note_samples[i] + feedback * reverb_buffer[-1]
-        reverb[i] = note_samples[i] + reverb_gain * reverb_buffer[-1]
+# https://github.com/pdx-cs-sound/effects/blob/master/reverb.py
+class RingBuffer(object):
+    def __init__(self, length):
+        self.length = length
+        self.buffer = [0]*length
+        self.head = 0
+        self.tail = 0
+        self.empty = True
 
-    return reverb
+    def enqueue(self, s):
+        assert self.empty or self.head != self.tail
+        self.buffer[self.tail] = s
+        self.tail = (self.tail + 1) % self.length
+        self.empty = False
+
+    def dequeue(self):
+        assert not self.empty
+        s = self.buffer[self.head]
+        self.head = (self.head + 1) % self.length
+        self.empty = self.head == self.tail
+        return s
+
+    def is_empty(self):
+        return self.empty
+
+def generate_reverb(audio_array, delay_ms=50.0, wet_fraction=0.5, reverb_fraction=0.8):
+    delay = int(delay_ms * 0.001 * SAMPLE_RATE)
+    buffer = RingBuffer(delay)
+    out_signal = []
+    for (i, s) in enumerate(audio_array):
+        if i < delay:
+            sdelay = 0
+        else:
+            sdelay = buffer.dequeue()
+        out_signal.append((1 - wet_fraction) * s + wet_fraction * sdelay)
+        buffer.enqueue((1 - reverb_fraction) * s + reverb_fraction * sdelay)
+    out_signal = np.array(out_signal)
+    return out_signal
 
 def generate_echo(note_samples, decay=0.5):
     echo = note_samples
