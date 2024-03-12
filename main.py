@@ -61,24 +61,22 @@ def generate_piano_note(freq):
 def generate_reverb(audio_array, delay_ms=50.0, wet_fraction=0.5, reverb_fraction=0.8):
     delay = int(delay_ms * 0.001 * SAMPLE_RATE)
     buffer = [0] * delay
-    head = 0
-    tail = 0
+    head, tail = 0, 0
 
     out_signal = []
 
-    for i, s in enumerate(audio_array):
+    for i, sample in enumerate(audio_array):
         if i < delay:
-            sdelay = 0
+            delayed_sample = 0
         else:
-            sdelay = buffer[head]
+            delayed_sample = buffer[head]
             head = (head + 1) % delay
 
-        out_signal.append((1 - wet_fraction) * s + wet_fraction * sdelay)
-        buffer[tail] = (1 - reverb_fraction) * s + reverb_fraction * sdelay
+        out_signal.append((1 - wet_fraction) * sample + wet_fraction * delayed_sample)
+        buffer[tail] = (1 - reverb_fraction) * sample + reverb_fraction * delayed_sample
         tail = (tail + 1) % delay
 
     return out_signal
-
 
 def generate_echo(note_samples, decay=0.5):
     echo = note_samples
