@@ -4,6 +4,7 @@ import pygame
 import pygame_menu
 
 # https://muted.io/note-frequencies/
+# Dictionary of note frequencies for each key
 NOTE_FREQUENCIES = {
     pygame.K_a: 440.00, # A4
     pygame.K_s: 493.88, # B4
@@ -19,7 +20,13 @@ SAMPLE_RATE = 44100
 DURATION = 1
 
 # https://www.math.drexel.edu/~dp399/musicmath/Karplus-Strong.html
+
 def karplus_strong(note_frequency):
+    """
+    Function to generate a note using the Karplus-Strong algorithm.
+    :param note_frequency: The frequency of the note to be generated.
+    :return: A numpy array representing the audio data of the modified note.
+    """
     length = int(SAMPLE_RATE / note_frequency)
     signal = np.random.uniform(-1, 1, length)
     new_samples = []
@@ -34,9 +41,14 @@ def karplus_strong(note_frequency):
         current_sample = current_sample % signal.size
     return np.array(new_samples)
 
-def generate_piano_note(freq):
+def generate_piano_note(note_frequency):
+    """
+    Function to generate a piano note.
+    :param note_frequency: The frequency of the note to be generated.
+    :return: A numpy array representing the audio data of the note.
+    """
     time = np.linspace(0, DURATION, SAMPLE_RATE, endpoint=False)
-    frequencies = [freq, freq * 1.5, freq * 0.5]
+    frequencies = [note_frequency, note_frequency * 1.5, note_frequency * 0.5]
     sine_waves = [np.sin(2*np.pi*f*time) for f in frequencies]
     combined_wave = np.sum(sine_waves, axis=0)
 
@@ -59,6 +71,14 @@ def generate_piano_note(freq):
 
 # https://github.com/pdx-cs-sound/effects/blob/master/reverb.py
 def generate_reverb(audio_array, delay_ms=50.0, wet_fraction=0.5, reverb_fraction=0.8):
+    """
+    Function to generate a reverb effect.
+    :param audio_array: The original audio data.
+    :param delay_ms: The delay for the reverb in milliseconds.
+    :param wet_fraction: The fraction of the reverb signal in the output.
+    :param reverb_fraction: The fraction of the reverb signal fed back into the buffer.
+    :return: A list representing the audio data with the reverb effect.
+    """
     delay = int(delay_ms * 0.001 * SAMPLE_RATE)
     buffer = [0] * delay
     head, tail = 0, 0
@@ -78,25 +98,42 @@ def generate_reverb(audio_array, delay_ms=50.0, wet_fraction=0.5, reverb_fractio
 
     return out_signal
 
-def generate_echo(note_samples, decay=0.5):
-    echo = note_samples
+def generate_echo(audio_array, decay=0.5):
+    """
+    Function to generate an echo effect.
+    :param audio_array: The original audio data.
+    :param decay: The decay factor for the echo.
+    :return: A numpy array representing the audio data with the echo effect.
+    """
+    echo = audio_array
     num_echoes = 2
     for _ in range(num_echoes):
-        note_samples = decay * note_samples
-        echo = np.append(echo, note_samples)
+        audio_array = decay * audio_array
+        echo = np.append(echo, audio_array)
 
     return echo
 
-def pitch_shift(audio_data, pitch_factor):
-    num_samples = len(audio_data)
+def pitch_shift(audio_array, pitch_factor):
+    """
+    Function to shift the pitch of the audio data.
+    :param audio_array: The original audio data.
+    :param pitch_factor: The factor by which to shift the pitch.
+    :return: A numpy array representing the audio data with the pitch shifted.
+    """
+    num_samples = len(audio_array)
     pitch_shifted = np.zeros(num_samples)
     for i in range(num_samples):
         new_sample_index = int(i * pitch_factor)
         if new_sample_index < num_samples:
-            pitch_shifted[i] = audio_data[new_sample_index]
+            pitch_shifted[i] = audio_array[new_sample_index]
     return pitch_shifted
 
 def play(effect, _value):
+    """
+    Function to play the notes with the selected effect.
+    :param effect: The selected effect.
+    :param _value: Unused parameter received from dropselect function of pygame_menu.
+    """
     playing_notes = set()
     running = True
     piano_notes = {}
