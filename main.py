@@ -110,16 +110,21 @@ def play(effect, _value):
             piano_notes[key] = generate_reverb(generate_piano_note(frequency))
         elif effect[0][0] == "Echo":
             piano_notes[key] = generate_echo(generate_piano_note(frequency))
-        elif effect[0][0] == "Pitch Shift":
+        elif effect[0][0] == "Pitch Shift (Low)":
             piano_notes[key] = pitch_shift(generate_piano_note(frequency), 0.5)
+        elif effect[0][0] == "Pitch Shift (High)":
+            piano_notes[key] = pitch_shift(generate_piano_note(frequency), 1.8)
 
     play_window = pygame.display.set_mode((700, 500))
     play_window.fill((165,42,42))
 
     font = pygame.font.Font(None, 36)
     text = font.render("Selected effect: "+effect[0][0], True, (255, 255, 255))
+    info_text = font.render("Press keys A-K to play the piano notes", True, (255, 255, 255))
     text_rect = text.get_rect(center = (play_window.get_width() // 2, 200))
+    info_text_rect = info_text.get_rect(center = (play_window.get_width() // 2, 250))
     play_window.blit(text, text_rect)
+    play_window.blit(info_text, info_text_rect)
 
     # https://medium.com/@01one/how-to-create-clickable-button-in-pygame-8dd608d17f1b
     btn_surface = pygame.Surface((150, 50))
@@ -165,7 +170,7 @@ if __name__ == '__main__':
                             theme=pygame_menu.themes.THEME_DARK)
 
     menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3), ('Echo', 4),
-                                    ('Pitch Shift', 5)], onchange=play)
+                                    ('Pitch Shift (Low)', 5), ('Pitch Shift (High)', 6)], onchange=play)
 
     menu.mainloop(window)
 
