@@ -3,7 +3,7 @@ import numpy as np
 from main import karplus_strong, generate_piano_note, generate_reverb, generate_echo, pitch_shift
 
 SAMPLE_RATE = 44100
-DURATION = 1
+DURATION = 0.9
 
 class TestMain(unittest.TestCase):
     def test_karplus_strong(self):
