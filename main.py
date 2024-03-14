@@ -54,13 +54,13 @@ def generate_piano_note(note_frequency):
 
     attack_time = 0.01
     decay_time = 0.01
-    release_time = 0.6
+    release_time = 0.5
     sustain_level = 0.2
 
     # https://en.wikipedia.org/wiki/Envelope_(music)
     envelope = np.concatenate([
-        np.linspace(0, 1, int(attack_time * SAMPLE_RATE), endpoint=False),
-        np.linspace(1, sustain_level, int(decay_time * SAMPLE_RATE), endpoint=False),
+        np.linspace(0, 0.5, int(attack_time * SAMPLE_RATE), endpoint=False),
+        np.linspace(0.5, sustain_level, int(decay_time * SAMPLE_RATE), endpoint=False),
         np.full(int((DURATION - attack_time - decay_time - release_time) * SAMPLE_RATE), sustain_level),
         np.linspace(sustain_level, 0, int(release_time * SAMPLE_RATE), endpoint=False)
     ])
