@@ -17,7 +17,7 @@ NOTE_FREQUENCIES = {
 }
 
 SAMPLE_RATE = 44100
-DURATION = 1
+DURATION = 0.9
 
 # https://www.math.drexel.edu/~dp399/musicmath/Karplus-Strong.html
 
@@ -47,7 +47,7 @@ def generate_piano_note(note_frequency):
     :param note_frequency: The frequency of the note to be generated.
     :return: A numpy array representing the audio data of the note.
     """
-    time = np.linspace(0, DURATION, SAMPLE_RATE, endpoint=False)
+    time = np.linspace(0, DURATION, int(DURATION*SAMPLE_RATE), endpoint=False)
     frequencies = [note_frequency, note_frequency * 1.5, note_frequency * 0.5]
     sine_waves = [np.sin(2*np.pi*f*time) for f in frequencies]
     combined_wave = np.sum(sine_waves, axis=0)
@@ -58,11 +58,16 @@ def generate_piano_note(note_frequency):
     sustain_level = 0.2
 
     # https://en.wikipedia.org/wiki/Envelope_(music)
+    attack_samples = int(attack_time * SAMPLE_RATE)
+    decay_samples = int(decay_time * SAMPLE_RATE)
+    release_samples = int(release_time * SAMPLE_RATE)
+    sustain_samples = len(time) - attack_samples - decay_samples - release_samples
+
     envelope = np.concatenate([
-        np.linspace(0, 0.5, int(attack_time * SAMPLE_RATE), endpoint=False),
-        np.linspace(0.5, sustain_level, int(decay_time * SAMPLE_RATE), endpoint=False),
-        np.full(int((DURATION - attack_time - decay_time - release_time) * SAMPLE_RATE), sustain_level),
-        np.linspace(sustain_level, 0, int(release_time * SAMPLE_RATE), endpoint=False)
+        np.linspace(0, 0.5, attack_samples),
+        np.linspace(0.5, sustain_level, decay_samples),
+        np.full(sustain_samples, sustain_level),
+        np.linspace(sustain_level, 0, release_samples)
     ])
 
     piano_note = combined_wave * envelope
