@@ -157,7 +157,7 @@ def play(effect, _value):
         elif effect[0][0] == "Pitch Shift (High)":
             piano_notes[key] = pitch_shift(generate_piano_note(frequency), 1.8)
 
-    play_window = pygame.display.set_mode((700, 500))
+    play_window = pygame.display.set_mode((1000, 700))
     play_window.fill((165,42,42))
 
     font = pygame.font.Font(None, 36)
@@ -172,7 +172,7 @@ def play(effect, _value):
     btn_surface = pygame.Surface((150, 50))
     btn_text = font.render("Go back", True, (255, 255, 255))
     text_rect = btn_text.get_rect(center=(btn_surface.get_width() / 2, btn_surface.get_height() / 2))
-    btn_rect = pygame.Rect(270, 300, 150, 50)
+    btn_rect = pygame.Rect(420, 400, 150, 50)
     btn_surface.blit(btn_text, text_rect)
     play_window.blit(btn_surface, (btn_rect.x, btn_rect.y))
 
@@ -205,10 +205,10 @@ def play(effect, _value):
 
 if __name__ == '__main__':
     pygame.init()
-    window = pygame.display.set_mode((700, 500))
+    window = pygame.display.set_mode((1000, 700))
 
     # https://pygame-menu.readthedocs.io/en/latest/
-    menu = pygame_menu.Menu('Welcome', 600, 500,
+    menu = pygame_menu.Menu('Digital Piano', 1000, 700,
                             theme=pygame_menu.themes.THEME_DARK)
 
     menu.add.dropselect("Effects", [('Regular', 1), ('Karplus Strong', 2), ('Reverb', 3), ('Echo', 4),
