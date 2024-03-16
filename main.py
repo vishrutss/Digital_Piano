@@ -1,6 +1,7 @@
 import numpy as np
 import sounddevice as sd
 import pygame
+from scipy.io.wavfile import write
 import pygame_menu
 
 # https://muted.io/note-frequencies/
@@ -178,6 +179,8 @@ def play(effect, _value):
 
     pygame.display.update()
 
+    output_samples = np.array([])
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -197,9 +200,12 @@ def play(effect, _value):
 
         for key in playing_notes:
             combined_samples += piano_notes[key]
+            output_samples = np.append(output_samples, piano_notes[key])
 
         sd.play(combined_samples, SAMPLE_RATE)
         sd.wait()
+
+        write('output.wav', SAMPLE_RATE, output_samples)
 
         playing_notes.clear()
 
