@@ -79,3 +79,12 @@ rate times the duration of the note.
 of the input array.
 
 All the tests are present in the `test.py` file.
+
+## Sources:
+* Frequencies for each note: https://muted.io/note-frequencies/
+* Karplus-Strong implementation: https://www.math.drexel.edu/~dp399/musicmath/Karplus-Strong.html
+* ADSR envelope: https://en.wikipedia.org/wiki/Envelope_(music)
+* Reverb implementation: https://github.com/pdx-cs-sound/effects/blob/master/reverb.py
+* PyGame UI (buttons): https://medium.com/@01one/how-to-create-clickable-button-in-pygame-8dd608d17f1b
+* PyGame UI: https://www.pygame.org/docs/ref/key.html
+* PyGame-Menu: https://pygame-menu.readthedocs.io/en/latest/
