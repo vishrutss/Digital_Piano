@@ -5,6 +5,7 @@
 Please install the following libraries before running main.py
 ```
 pip install sounddevice
+pip install scipy
 pip install pygame
 pip install pygame-menu -U
 ```
